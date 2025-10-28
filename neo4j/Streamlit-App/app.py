@@ -10,7 +10,7 @@ from modules.ui_helpers import sidebar_filters
 # ========================================
 NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"
-NEO4J_PASS = "plbconsultant"
+NEO4J_PASS = "adminadmin"
 
 st.set_page_config(page_title="Neo4j Graph Explorer", layout="wide")
 st.title("🌐 Neo4j Graph Explorer - Interactive")
@@ -43,11 +43,35 @@ else:
     st.warning("Aucun nœud ou relation ne correspond aux filtres sélectionnés.")
 
 # Chemin vers ton fichier style.grass exporté depuis Neo4j Browser
+# Dans app.py, remplacer l'appel existant par ceci
 STYLE_FILE = "assets/style.grass"
 
-# Construction du graphe Pyvis
 if nodes:
-    graph_html = build_pyvis_graph(nodes, relationships, height="750px", style_file=STYLE_FILE)
+    result = build_pyvis_graph(nodes, relationships, height="750px", style_file=STYLE_FILE, debug=True)
+    # result est un dict avec 'html' et 'debug'
+    graph_html = result["html"]
+    debug_info = result["debug"]
+
+    # Affiche d'abord le debug (panneau repliable)
+    with st.expander("Debug styles par noeud (ouvrir pour voir)"):
+        st.write("Extrait des premiers nœuds et le style appliqué (id, raw_labels, chosen_label, applied_style_color)")
+        # On affiche une version concise
+        # version robuste : utilise les clés présentes dans debug_info
+        short = []
+        for d in debug_info:
+            short.append({
+                "id": d.get("id"),
+                "raw_labels": d.get("raw_labels"),
+                "chosen_label": d.get("chosen_label"),
+                # key changed in graph_builder: bg_color (fallback to applied_style_color if present)
+                "color": d.get("bg_color", d.get("applied_style_color", None)),
+                "caption": d.get("caption")
+            })
+        st.json(short)
+
+
+    # Affiche le graphe
     components.html(graph_html, height=750, scrolling=True)
 else:
     st.warning("Aucun nœud ou relation ne correspond aux filtres sélectionnés.")
+
