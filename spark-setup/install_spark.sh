@@ -177,16 +177,16 @@ log_info "Phase 6/7: Terminée ✓"
 #############################################
 log_info "Phase 7/7: Installation PySpark et bibliothèques Python"
 
-pip3 install --upgrade pip
+pip3 install --upgrade pip --break-system-packages
 
 log_info "Installation de PySpark..."
-pip3 install pyspark==${SPARK_VERSION}
+pip3 install pyspark==${SPARK_VERSION} --break-system-packages
 
 log_info "Installation de pandas, numpy, matplotlib..."
-pip3 install pandas numpy matplotlib seaborn
+pip3 install pandas numpy matplotlib seaborn --break-system-packages
 
 log_info "Installation de Jupyter Notebook..."
-pip3 install jupyter notebook ipython
+pip3 install jupyter notebook ipython --break-system-packages
 
 # Configuration PySpark avec Jupyter
 if ! grep -q "PYSPARK_DRIVER_PYTHON" ~/.bashrc; then
