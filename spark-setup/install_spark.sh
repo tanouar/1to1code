@@ -2,7 +2,7 @@
 
 #############################################
 # Script d'installation Apache Spark
-# Ubuntu Server 22.04 LTS
+# Ubuntu Server 24.04 LTS
 # Avec PySpark, Jupyter et dépendances
 #############################################
 
@@ -34,10 +34,12 @@ SPARK_PACKAGE="spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}"
 SPARK_DOWNLOAD_URL="https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/${SPARK_PACKAGE}.tgz"
 INSTALL_DIR="/opt/spark"
 JAVA_VERSION="11"
+VENV_DIR="$HOME/spark-venv"
 
 log_info "=== Début de l'installation Apache Spark ==="
 log_info "Version Spark: ${SPARK_VERSION}"
 log_info "Répertoire d'installation: ${INSTALL_DIR}"
+log_info "Environnement virtuel Python: ${VENV_DIR}"
 
 #############################################
 # Phase 1: Préparation Système
@@ -46,7 +48,7 @@ log_info "Phase 1/7: Mise à jour du système"
 
 sudo apt-get update -y
 sudo apt-get upgrade -y
-sudo apt-get install -y wget curl vim git software-properties-common
+sudo apt-get install -y wget curl vim git software-properties-common python3-venv python3-full
 
 log_info "Phase 1/7: Terminée ✓"
 
@@ -66,13 +68,25 @@ java -version
 log_info "Phase 2/7: Terminée ✓"
 
 #############################################
-# Phase 3: Installation Python et dépendances
+# Phase 3: Création environnement virtuel Python
 #############################################
-log_info "Phase 3/7: Installation Python et pip"
+log_info "Phase 3/7: Création de l'environnement virtuel Python"
 
-sudo apt-get install -y python3 python3-pip python3-venv
-python3 --version
-pip3 --version
+# Supprimer l'ancien venv s'il existe
+if [ -d "${VENV_DIR}" ]; then
+    log_warn "Environnement virtuel existant détecté, suppression..."
+    rm -rf ${VENV_DIR}
+fi
+
+python3 -m venv ${VENV_DIR}
+log_info "Environnement virtuel créé: ${VENV_DIR}"
+
+# Activer l'environnement virtuel
+source ${VENV_DIR}/bin/activate
+log_info "Environnement virtuel activé"
+
+# Mettre à jour pip dans le venv
+pip install --upgrade pip
 
 log_info "Phase 3/7: Terminée ✓"
 
@@ -94,8 +108,15 @@ log_info "Extraction de l'archive..."
 tar -xzf "${SPARK_PACKAGE}.tgz"
 
 log_info "Installation dans ${INSTALL_DIR}"
+
+# Supprimer l'installation existante si présente
+if [ -d "${INSTALL_DIR}" ]; then
+    log_warn "Installation Spark existante détectée, suppression..."
+    sudo rm -rf ${INSTALL_DIR}
+fi
+
 sudo mkdir -p ${INSTALL_DIR}
-sudo mv "${SPARK_PACKAGE}"/* ${INSTALL_DIR}/
+sudo cp -r "${SPARK_PACKAGE}"/* ${INSTALL_DIR}/
 sudo chown -R $USER:$USER ${INSTALL_DIR}
 
 # Nettoyage
@@ -109,25 +130,30 @@ log_info "Phase 4/7: Terminée ✓"
 #############################################
 log_info "Phase 5/7: Configuration des variables d'environnement"
 
-# Ajout dans .bashrc si pas déjà présent
-if ! grep -q "SPARK_HOME" ~/.bashrc; then
-    cat >> ~/.bashrc << EOF
+# Nettoyer les anciennes configurations dans .bashrc
+sed -i '/# Apache Spark Configuration/,/export PYSPARK_DRIVER_PYTHON_OPTS/d' ~/.bashrc
+
+# Ajout dans .bashrc
+cat >> ~/.bashrc << EOF
 
 # Apache Spark Configuration
 export SPARK_HOME=${INSTALL_DIR}
 export PATH=\$PATH:\$SPARK_HOME/bin:\$SPARK_HOME/sbin
-export PYSPARK_PYTHON=python3
 export JAVA_HOME=${JAVA_HOME}
+export PYSPARK_PYTHON=${VENV_DIR}/bin/python
+export PYSPARK_DRIVER_PYTHON=${VENV_DIR}/bin/jupyter
+export PYSPARK_DRIVER_PYTHON_OPTS='notebook --no-browser --ip=0.0.0.0 --port=8888'
+
+# Activer l'environnement virtuel Python pour Spark
+source ${VENV_DIR}/bin/activate
 EOF
-    log_info "Variables ajoutées à ~/.bashrc"
-else
-    log_warn "Variables Spark déjà présentes dans ~/.bashrc"
-fi
+
+log_info "Variables ajoutées à ~/.bashrc"
 
 # Application immédiate des variables
 export SPARK_HOME=${INSTALL_DIR}
 export PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
-export PYSPARK_PYTHON=python3
+export PYSPARK_PYTHON=${VENV_DIR}/bin/python
 
 log_info "Phase 5/7: Terminée ✓"
 
@@ -140,7 +166,7 @@ log_info "Phase 6/7: Configuration Spark"
 cat > ${SPARK_HOME}/conf/spark-env.sh << 'EOF'
 #!/usr/bin/env bash
 
-# Configuration pour VM avec 4 cores et 16-32GB RAM
+# Configuration pour VM avec 4 cores et 24GB RAM
 export SPARK_MASTER_HOST=localhost
 export SPARK_WORKER_CORES=3
 export SPARK_WORKER_MEMORY=8g
@@ -168,7 +194,9 @@ EOF
 log_info "spark-defaults.conf configuré"
 
 # Configuration log4j (réduire la verbosité)
-cp ${SPARK_HOME}/conf/log4j2.properties.template ${SPARK_HOME}/conf/log4j2.properties 2>/dev/null || true
+if [ -f "${SPARK_HOME}/conf/log4j2.properties.template" ]; then
+    cp ${SPARK_HOME}/conf/log4j2.properties.template ${SPARK_HOME}/conf/log4j2.properties
+fi
 
 log_info "Phase 6/7: Terminée ✓"
 
@@ -177,27 +205,17 @@ log_info "Phase 6/7: Terminée ✓"
 #############################################
 log_info "Phase 7/7: Installation PySpark et bibliothèques Python"
 
-pip3 install --upgrade pip --break-system-packages
+# S'assurer que le venv est activé
+source ${VENV_DIR}/bin/activate
 
 log_info "Installation de PySpark..."
-pip3 install pyspark==${SPARK_VERSION} --break-system-packages
+pip install pyspark==${SPARK_VERSION}
 
 log_info "Installation de pandas, numpy, matplotlib..."
-pip3 install pandas numpy matplotlib seaborn --break-system-packages
+pip install pandas numpy matplotlib seaborn
 
 log_info "Installation de Jupyter Notebook..."
-pip3 install jupyter notebook ipython --break-system-packages
-
-# Configuration PySpark avec Jupyter
-if ! grep -q "PYSPARK_DRIVER_PYTHON" ~/.bashrc; then
-    cat >> ~/.bashrc << 'EOF'
-
-# PySpark avec Jupyter
-export PYSPARK_DRIVER_PYTHON=jupyter
-export PYSPARK_DRIVER_PYTHON_OPTS='notebook --no-browser --ip=0.0.0.0 --port=8888'
-EOF
-    log_info "Configuration Jupyter ajoutée à ~/.bashrc"
-fi
+pip install jupyter notebook ipython
 
 log_info "Phase 7/7: Terminée ✓"
 
@@ -252,6 +270,31 @@ EOF
 
 chmod +x ${WORKSPACE_DIR}/scripts/test_spark.py
 
+# Créer un script pour lancer PySpark facilement
+cat > $HOME/start_pyspark.sh << EOF
+#!/bin/bash
+source ${VENV_DIR}/bin/activate
+export SPARK_HOME=${INSTALL_DIR}
+export PATH=\$PATH:\$SPARK_HOME/bin
+export PYSPARK_PYTHON=${VENV_DIR}/bin/python
+pyspark
+EOF
+
+chmod +x $HOME/start_pyspark.sh
+
+# Créer un script pour lancer Jupyter facilement
+cat > $HOME/start_jupyter.sh << EOF
+#!/bin/bash
+source ${VENV_DIR}/bin/activate
+export SPARK_HOME=${INSTALL_DIR}
+export PATH=\$PATH:\$SPARK_HOME/bin
+export PYSPARK_PYTHON=${VENV_DIR}/bin/python
+cd ${WORKSPACE_DIR}/notebooks
+jupyter notebook --ip=0.0.0.0 --no-browser --port=8888
+EOF
+
+chmod +x $HOME/start_jupyter.sh
+
 log_info "Répertoire de travail créé: ${WORKSPACE_DIR}"
 
 #############################################
@@ -264,16 +307,16 @@ log_info "Test Java:"
 java -version 2>&1 | head -n 1
 
 # Test Python
-log_info "Test Python:"
-python3 --version
+log_info "Test Python (dans venv):"
+${VENV_DIR}/bin/python --version
 
 # Test PySpark
 log_info "Test PySpark (import):"
-python3 -c "import pyspark; print(f'PySpark version: {pyspark.__version__}')"
+${VENV_DIR}/bin/python -c "import pyspark; print(f'PySpark version: {pyspark.__version__}')"
 
 # Test Spark
 log_info "Test Spark Shell (version):"
-${SPARK_HOME}/bin/spark-shell --version 2>&1 | grep "version"
+${SPARK_HOME}/bin/spark-shell --version 2>&1 | grep "version" | head -n 1
 
 #############################################
 # Résumé de l'installation
@@ -285,20 +328,26 @@ echo "=============================================="
 echo ""
 echo "📍 Informations importantes:"
 echo "   - SPARK_HOME: ${SPARK_HOME}"
+echo "   - Python venv: ${VENV_DIR}"
 echo "   - Workspace: ${WORKSPACE_DIR}"
 echo "   - Spark UI: http://localhost:4040 (quand Spark est actif)"
 echo "   - Jupyter: http://localhost:8888 (à démarrer manuellement)"
 echo ""
 echo "🚀 Pour commencer:"
 echo "   1. Recharger les variables: source ~/.bashrc"
-echo "   2. Tester PySpark: pyspark"
-echo "   3. Lancer le test: python3 ${WORKSPACE_DIR}/scripts/test_spark.py"
-echo "   4. Lancer Jupyter: jupyter notebook --ip=0.0.0.0 --no-browser"
+echo "   2. Tester PySpark: ~/start_pyspark.sh"
+echo "   3. Lancer le test: ${VENV_DIR}/bin/python ${WORKSPACE_DIR}/scripts/test_spark.py"
+echo "   4. Lancer Jupyter: ~/start_jupyter.sh"
 echo ""
 echo "📚 Commandes utiles:"
-echo "   - pyspark                    # Shell PySpark interactif"
+echo "   - ~/start_pyspark.sh         # Shell PySpark interactif"
+echo "   - ~/start_jupyter.sh         # Lancer Jupyter Notebook"
 echo "   - spark-shell                # Shell Scala interactif"
 echo "   - spark-submit script.py     # Exécuter un script"
+echo ""
+echo "💡 Important:"
+echo "   - Toujours activer le venv: source ${VENV_DIR}/bin/activate"
+echo "   - Ou utiliser les scripts de lancement fournis"
 echo ""
 echo "✅ Prochaine étape: Redémarrez votre shell ou tapez 'source ~/.bashrc'"
 echo "=============================================="
