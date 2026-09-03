@@ -1,0 +1,149 @@
+[
+  {
+    "order_id": 1001,
+    "customer_id": "CUST01",
+    "order_date": "2024-01-05",
+    "ship_to_city": "Paris",
+    "ship_to_country": "France"
+  },
+  {
+    "order_id": 1002,
+    "customer_id": "CUST02",
+    "order_date": "2024-01-08",
+    "ship_to_city": "London",
+    "ship_to_country": "UK"
+  },
+  {
+    "order_id": 1003,
+    "customer_id": "CUST03",
+    "order_date": "2024-01-12",
+    "ship_to_city": "Berlin",
+    "ship_to_country": "Germany"
+  },
+  {
+    "order_id": 1004,
+    "customer_id": "CUST01",
+    "order_date": "2024-01-15",
+    "ship_to_city": "Paris",
+    "ship_to_country": "France"
+  },
+  {
+    "order_id": 1005,
+    "customer_id": "CUST04",
+    "order_date": "2024-01-18",
+    "ship_to_city": "Madrid",
+    "ship_to_country": "Spain"
+  },
+  {
+    "order_id": 1006,
+    "customer_id": "CUST05",
+    "order_date": "2024-01-22",
+    "ship_to_city": "Rome",
+    "ship_to_country": "Italy"
+  },
+  {
+    "order_id": 1007,
+    "customer_id": "CUST02",
+    "order_date": "2024-01-25",
+    "ship_to_city": "London",
+    "ship_to_country": "UK"
+  },
+  {
+    "order_id": 1008,
+    "customer_id": "CUST06",
+    "order_date": "2024-02-02",
+    "ship_to_city": "Amsterdam",
+    "ship_to_country": "Netherlands"
+  },
+  {
+    "order_id": 1009,
+    "customer_id": "CUST03",
+    "order_date": "2024-02-05",
+    "ship_to_city": "Berlin",
+    "ship_to_country": "Germany"
+  },
+  {
+    "order_id": 1010,
+    "customer_id": "CUST07",
+    "order_date": "2024-02-08",
+    "ship_to_city": "Brussels",
+    "ship_to_country": "Belgium"
+  },
+  {
+    "order_id": 1011,
+    "customer_id": "CUST01",
+    "order_date": "2024-02-12",
+    "ship_to_city": "Paris",
+    "ship_to_country": "France"
+  },
+  {
+    "order_id": 1012,
+    "customer_id": "CUST08",
+    "order_date": "2024-02-15",
+    "ship_to_city": "Zurich",
+    "ship_to_country": "Switzerland"
+  },
+  {
+    "order_id": 1013,
+    "customer_id": "CUST04",
+    "order_date": "2024-02-18",
+    "ship_to_city": "Madrid",
+    "ship_to_country": "Spain"
+  },
+  {
+    "order_id": 1014,
+    "customer_id": "CUST05",
+    "order_date": "2024-02-22",
+    "ship_to_city": "Rome",
+    "ship_to_country": "Italy"
+  },
+  {
+    "order_id": 1015,
+    "customer_id": "CUST09",
+    "order_date": "2024-03-01",
+    "ship_to_city": "Vienna",
+    "ship_to_country": "Austria"
+  },
+  {
+    "order_id": 1016,
+    "customer_id": "CUST06",
+    "order_date": "2024-03-05",
+    "ship_to_city": "Amsterdam",
+    "ship_to_country": "Netherlands"
+  },
+  {
+    "order_id": 1017,
+    "customer_id": "CUST10",
+    "order_date": "2024-03-08",
+    "ship_to_city": "Warsaw",
+    "ship_to_country": "Poland"
+  },
+  {
+    "order_id": 1018,
+    "customer_id": "CUST02",
+    "order_date": "2024-03-12",
+    "ship_to_city": "London",
+    "ship_to_country": "UK"
+  },
+  {
+    "order_id": 1019,
+    "customer_id": "CUST07",
+    "order_date": "2024-03-15",
+    "ship_to_city": "Brussels",
+    "ship_to_country": "Belgium"
+  },
+  {
+    "order_id": 1020,
+    "customer_id": "CUST03",
+    "order_date": "2024-03-18",
+    "ship_to_city": "Berlin",
+    "ship_to_country": "Germany"
+  },
+  {
+    "order_id": 1005,
+    "customer_id": "CUST04",
+    "order_date": "2024-01-18",
+    "ship_to_city": "Madrid",
+    "ship_to_country": "Spain"
+  }
+]
