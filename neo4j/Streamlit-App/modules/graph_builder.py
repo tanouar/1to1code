@@ -106,16 +106,16 @@ def build_pyvis_graph(nodes, relationships, height="600px", style_file=None, lab
 
     for node in nodes:
         raw_label_list = _extract_node_labels(node)
-        raw_lower = [l.lower() for l in raw_label_list]
+        raw_lower = [val.lower() for val in raw_label_list]
 
         # Appliquer mapping si fourni
         mapped = []
-        for l in raw_lower:
-            mapped.append(label_map.get(l, l))
+        for raw in raw_lower:
+            mapped.append(label_map.get(raw, raw))
         chosen_label = None
-        for l in mapped:
-            if l in label_styles:
-                chosen_label = l
+        for raw in mapped:
+            if raw in label_styles:
+                chosen_label = raw
                 break
         if chosen_label is None and "*" in label_styles:
             chosen_label = "*"

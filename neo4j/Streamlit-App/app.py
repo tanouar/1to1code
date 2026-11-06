@@ -10,7 +10,7 @@ from modules.ui_helpers import sidebar_filters
 # ========================================
 NEO4J_URI = "bolt://localhost:7687"
 NEO4J_USER = "neo4j"
-NEO4J_PASS = "adminadmin"
+NEO4J_PASS = "plbconsultant"
 
 st.set_page_config(page_title="Neo4j Graph Explorer", layout="wide")
 st.title("🌐 Neo4j Graph Explorer - Interactive")

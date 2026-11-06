@@ -26,11 +26,11 @@ class Neo4jConnector:
         """
         label_filter = ""
         if labels:
-            label_filter = "WHERE " + " OR ".join([f"'{l}' IN labels(n)" for l in labels])
+            label_filter = "WHERE " + " OR ".join([f"'{label}' IN labels(n)" for label in labels])
 
         rel_filter = ""
         if rel_types:
-            rel_filter = "AND " + " OR ".join([f"type(r) = '{r_type}'" for r_type in rel_types])
+            rel_filter = "AND " + " OR ".join([f"type(r) = '{rel_type}'" for rel_type in rel_types])
 
         query = f"""
         MATCH (n)
