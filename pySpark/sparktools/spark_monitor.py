@@ -5,7 +5,7 @@ Permet de tracker l'exécution des jobs et d'afficher les métriques
 
 import time
 import uuid
-from typing import Callable, Any, List, Dict
+from typing import Callable, Any, Dict
 from functools import wraps
 
 
@@ -103,9 +103,9 @@ class SparkJobMonitor:
         
         if stage_info:
             total_tasks = sum(s['num_tasks'] for s in stage_info)
-            print(f"📦 Stages: {len(stage_info)} | Tasks: {total_tasks}")
+            print(f"📦 Stages: {len(stage_info)} | Tasks: {total_tasks}") # noqa
         
-        print(f"🌐 Spark UI: http://localhost:4040/jobs/")
+        print(f"🌐 Spark UI: http://localhost:4040/jobs/") # noqa
         
         # Réinitialiser le job group (CORRECTION ICI)
         self.spark.sparkContext.setLocalProperty("spark.jobGroup.id", None)
@@ -125,27 +125,27 @@ class SparkJobMonitor:
         total_duration = sum(job['duration'] for job in self.job_history)
         success_count = sum(1 for job in self.job_history if job['status'] == "✅ SUCCESS")
         
-        print(f"\n📊 Statistiques globales:")
-        print(f"   Total jobs: {len(self.job_history)}")
-        print(f"   Réussis: {success_count}")
-        print(f"   Échoués: {len(self.job_history) - success_count}")
-        print(f"   Durée totale: {total_duration:.2f}s")
-        print(f"\n{'='*60}")
+        print(f"\n📊 Statistiques globales:") # noqa
+        print(f"   Total jobs: {len(self.job_history)}") # noqa
+        print(f"   Réussis: {success_count}") # noqa
+        print(f"   Échoués: {len(self.job_history) - success_count}") # noqa
+        print(f"   Durée totale: {total_duration:.2f}s") # noqa
+        print(f"\n{'='*60}") # noqa
         
         for i, job in enumerate(self.job_history, 1):
-            print(f"\n{i}. {job['name']}")
-            print(f"   Tracking ID: {job['tracking_id']}")
-            print(f"   Spark Job IDs: {job['spark_job_ids']}")
+            print(f"\n{i}. {job['name']}") # noqa
+            print(f"   Tracking ID: {job['tracking_id']}") # noqa
+            print(f"   Spark Job IDs: {job['spark_job_ids']}") # noqa
             
             if job['stages']:
                 total_tasks = sum(s['num_tasks'] for s in job['stages'])
-                print(f"   Stages: {len(job['stages'])} | Tasks: {total_tasks}")
+                print(f"   Stages: {len(job['stages'])} | Tasks: {total_tasks}") # noqa
             
-            print(f"   Durée: {job['duration']:.2f}s")
-            print(f"   Status: {job['status']}")
+            print(f"   Durée: {job['duration']:.2f}s") # noqa
+            print(f"   Status: {job['status']}") # noqa
             
             if job['error']:
-                print(f"   Erreur: {job['error']}")
+                print(f"   Erreur: {job['error']}") # noqa
     
     def get_last_job(self) -> Dict:
         """Retourne les informations du dernier job exécuté"""
@@ -203,15 +203,15 @@ def track_spark_job(description: str):
             if spark:
                 spark.sparkContext.setJobDescription(description)
             
-            print(f"\n🔵 {description}")
+            print(f"\n🔵 {description}") # noqa
             print("=" * 60)
             
             start_time = time.time()
             result = func(*args, **kwargs)
             elapsed = time.time() - start_time
             
-            print(f"\n✅ Terminé en {elapsed:.2f}s")
-            print(f"🌐 Spark UI: http://localhost:4040/jobs/")
+            print(f"\n✅ Terminé en {elapsed:.2f}s") # noqa
+            print(f"🌐 Spark UI: http://localhost:4040/jobs/") # noqa
             
             return result
         return wrapper
@@ -240,7 +240,7 @@ def execute_with_job_tracking(spark, action_func: Callable, description: str) ->
     result = action_func()
     elapsed = time.time() - start_time
     
-    print(f"\n✅ Terminé en {elapsed:.2f}s")
-    print(f"🌐 Spark UI: http://localhost:4040/jobs/")
+    print(f"\n✅ Terminé en {elapsed:.2f}s") # noqa
+    print(f"🌐 Spark UI: http://localhost:4040/jobs/") # noqa
     
     return result

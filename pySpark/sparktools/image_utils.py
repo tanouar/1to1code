@@ -5,10 +5,13 @@ Fournit :
   - extract_image_info : UDF qui extrait width/height/channels/format
   - build_metadata_pipeline : transformations lazy sur les noms de fichiers
   - add_image_dimensions : applique l'UDF et aplatit les colonnes résultantes
+  - resize_images : UDF qui redimensionne les images (transformation lazy)
 """
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StructField, IntegerType, StringType
+from pyspark.sql.types import (
+    StructType, StructField, IntegerType, StringType, BinaryType
+)
 from pyspark.sql.functions import udf
 
 
@@ -129,4 +132,53 @@ def add_image_dimensions(df_with_meta: DataFrame) -> DataFrame:
         .withColumn("pixels",       F.col("width") * F.col("height"))
         .withColumn("aspect_ratio", (F.col("width") / F.col("height")).cast("decimal(10,2)"))
         .drop("_info")
+    )
+
+
+# ── Redimensionnement distribué ───────────────────────────────────────────────
+
+@udf(returnType=BinaryType())
+def _resize_udf(image_bytes, target_width, target_height):
+    """UDF interne — redimensionne une image via Pillow."""
+    try:
+        from PIL import Image
+        import io
+
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        img_resized = img.resize((target_width, target_height), Image.LANCZOS)
+        buf = io.BytesIO()
+        img_resized.save(buf, format="JPEG")
+        return buf.getvalue()
+    except Exception:
+        return None
+
+
+def resize_images(df_with_meta: DataFrame,
+                  width: int = 224,
+                  height: int = 224) -> DataFrame:
+    """
+    Redimensionne toutes les images du DataFrame à la taille cible.
+    Transformation LAZY — aucune image traitée avant une action.
+
+    Chaque worker traite sa partition en parallèle via l'UDF Pillow.
+
+    Colonnes ajoutées :
+      - resized_content : bytes de l'image redimensionnée (JPEG)
+      - resized_width   : largeur cible
+      - resized_height  : hauteur cible
+
+    Args:
+        df_with_meta : DataFrame avec colonne 'content' (binary)
+        width        : largeur cible en pixels (défaut : 224)
+        height       : hauteur cible en pixels (défaut : 224)
+
+    Returns:
+        DataFrame enrichi (lazy)
+    """
+    return (
+        df_with_meta
+        .withColumn("resized_content",
+                    _resize_udf(F.col("content"), F.lit(width), F.lit(height)))
+        .withColumn("resized_width",  F.lit(width))
+        .withColumn("resized_height", F.lit(height))
     )

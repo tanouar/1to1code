@@ -18,11 +18,11 @@ def download_iris(dest: str = "/content/iris.csv") -> str:
     if not os.path.exists(dest):
         os.makedirs(os.path.dirname(dest) or ".", exist_ok=True)
         url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
-        print(f"⏳ Téléchargement Iris...")
+        print(f"⏳ Téléchargement Iris...") # noqa
         urllib.request.urlretrieve(url, dest)
-        print(f"✓ Iris téléchargé → {dest}")
+        print(f"✓ Iris téléchargé → {dest}") # noqa
     else:
-        print(f"✓ Iris déjà présent → {dest}")
+        print(f"✓ Iris déjà présent → {dest}") # noqa
     return dest
 
 

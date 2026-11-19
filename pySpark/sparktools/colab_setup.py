@@ -2,8 +2,8 @@
 Configuration de l'environnement Google Colab pour les cours PySpark.
 """
 from pyspark.sql import SparkSession
-from sparktools.spark_monitor import SparkJobMonitor
-from sparktools.spark_utils import SparkHelper
+from Python.pySpark.sparktools.spark_monitor import SparkJobMonitor
+from Python.pySpark.sparktools.spark_utils import SparkHelper
 
 
 def setup_colab(app_name: str = "PySpark Course",
@@ -39,15 +39,15 @@ def setup_colab(app_name: str = "PySpark Course",
         output.serve_kernel_port_as_window(4040, path="/jobs/index.html")
         print("✓ SparkUI ouverte → cliquez sur le lien ci-dessus")
     except ImportError:
-        print(f"✓ SparkUI disponible sur http://localhost:4040")
+        print(f"✓ SparkUI disponible sur http://localhost:4040") # noqa
 
     monitor = SparkJobMonitor(spark)
     helper = SparkHelper()
 
     print("=" * 60)
-    print(f"✓ Spark {spark.version}  |  App : {app_name}")
-    print(f"✓ Memory : {memory}  |  Shuffle partitions : {shuffle_partitions}")
-    print(f"✓ SparkJobMonitor et SparkHelper initialisés")
+    print(f"✓ Spark {spark.version}  |  App : {app_name}") # noqa
+    print(f"✓ Memory : {memory}  |  Shuffle partitions : {shuffle_partitions}") # noqa
+    print(f"✓ SparkJobMonitor et SparkHelper initialisés") # noqa
     print("=" * 60)
 
     return spark, monitor, helper
